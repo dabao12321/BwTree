@@ -35,6 +35,8 @@
 // offsetof() is defined here
 #include <cstddef>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
  * BWTREE_PELOTON - Specifies whether Peloton-specific features are
@@ -191,6 +193,7 @@ extern bool print_flag;
  * class BwTreeBase - Base class of BwTree that stores some common members
  */
 class BwTreeBase {
+  public:
   // This is the presumed size of cache line
   static constexpr size_t CACHE_LINE_SIZE = 64;
   
@@ -305,13 +308,13 @@ class BwTreeBase {
                 "class PaddedGCMetadata size does"
                 " not conform to the alignment!");
  
- private: 
+ public: 
   // This is used as the garbage collection ID, and is maintained in a per
   // thread level
   // This is initialized to -1 in order to distinguish between registered 
   // threads and unregistered threads
   static thread_local int gc_id;
-  
+private: 
   // This is used to count the number of threads participating GC process
   // We use this number to initialize GC data structure
   static std::atomic<size_t> total_thread_num;
@@ -1898,7 +1901,7 @@ class BwTree : public BwTreeBase {
     // One reasonable amount of memory for each chunk is 
     // delta chain len * struct len + sizeof this struct
     static constexpr size_t CHUNK_SIZE = \
-      sizeof(DeltaNodeUnion) * 8 + sizeof(AllocationMeta);
+      sizeof(DeltaNodeUnion) * 8 + sizeof(std::atomic<char *> ) + sizeof(char *const) + sizeof(std::atomic<AllocationMeta *>);
     
    private: 
     // This points to the higher address end of the chunk we are 

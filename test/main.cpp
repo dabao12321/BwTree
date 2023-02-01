@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
   bool run_infinite_insert_test = false;
   bool run_email_test = false;
   bool run_mixed_test = false;
+  bool run_ycsb_test = false;
 
   int opt_index = 1;
   while(opt_index < argc) {
@@ -57,6 +58,8 @@ int main(int argc, char **argv) {
       run_email_test = true;
     } else if(strcmp(opt_p, "--mixed-test") == 0) {
       run_mixed_test = true;
+    } else if(strcmp(opt_p, "--ycsb-test") == 0) {
+      run_ycsb_test = true;
     } else {
       printf("ERROR: Unknown option: %s\n", opt_p);
 
@@ -76,6 +79,7 @@ int main(int argc, char **argv) {
   bwt_printf("RUN_INFINITE_INSERT_TEST = %d\n", run_infinite_insert_test);
   bwt_printf("RUN_EMAIL_TEST = %d\n", run_email_test);
   bwt_printf("RUN_MIXED_TEST = %d\n", run_mixed_test);
+  bwt_printf("RUN_YCSB_TEST = %d\n", run_ycsb_test);
   bwt_printf("======================================\n");
 
   //////////////////////////////////////////////////////
@@ -83,6 +87,20 @@ int main(int argc, char **argv) {
   //////////////////////////////////////////////////////
 
   TreeType *t1 = nullptr;
+
+  if(run_ycsb_test == true) {
+    t1 = GetEmptyTree();
+
+    printf("Starting ycsb testing...\n");
+    // LaunchParallelTestID(t1, mixed_thread_num, MixedTest1, t1);
+    printf("Finished ycsb testing\n");
+
+    PrintStat(t1);
+
+    // MixedGetValueTest(t1);
+
+    DestroyTree(t1);
+  }
   
   if(run_mixed_test == true) {
     t1 = GetEmptyTree();
