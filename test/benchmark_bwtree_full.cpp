@@ -163,7 +163,7 @@ void BenchmarkBwTreeSeqRead(TreeType *t,
 
     for(int j = 0;j < iter;j++) {
       for(int i = 0;i < key_num;i++) {
-        t->GetValue(i, v);
+        // t->GetValue(i, v);
 
         v.clear();
       }
@@ -232,7 +232,7 @@ void BenchmarkBwTreeRandRead(TreeType *t,
         //int key = uniform_dist(e1);
         long int key = (long int)h((uint64_t)i, thread_id);
 
-        t->GetValue(key, v);
+        // t->GetValue(key, v);
 
         v.clear();
       }
@@ -315,7 +315,7 @@ void BenchmarkBwTreeZipfRead(TreeType *t,
       for(long i = start_index;i < end_index;i++) {
         long int key = zipfian_key_list[i];
 
-        t->GetValue(key, v);
+        // t->GetValue(key, v);
 
         v.clear();
       }

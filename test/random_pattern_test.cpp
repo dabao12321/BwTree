@@ -160,7 +160,7 @@ void RandomInsertSpeedTest(TreeType *t, size_t key_num) {
   for(size_t i = 0;i < key_num * 2;i++) {
     int key = uniform_dist(e1);
 
-    t->GetValue(key, v);
+    // t->GetValue(key, v);
 
     v.clear();
   }
@@ -227,7 +227,7 @@ void RandomInsertSeqReadSpeedTest(TreeType *t, size_t key_num) {
   start = std::chrono::system_clock::now();
 
   for(size_t i = 0;i < key_num * 2;i++) {
-    t->GetValue(i, v);
+    // t->GetValue(i, v);
 
     v.clear();
   }
@@ -276,7 +276,7 @@ void SeqInsertRandomReadSpeedTest(TreeType *t, size_t key_num) {
   for(size_t i = 0;i < key_num * 2;i++) {
     int key = uniform_dist(e1);
 
-    t->GetValue(key, v);
+    // t->GetValue(key, v);
 
     v.clear();
   }

@@ -86,7 +86,7 @@ using TreeType = BwTree<uint64_t,
                         KeyComparator,
                         KeyEqualityChecker>;
                         
-using BTreeType = btree_multimap<long, long, KeyComparator>;
+using BTreeType = btree_multimap<uint64_t, uint64_t, KeyComparator>;
 using ARTType = art_tree;
                         
 using LeafRemoveNode = typename TreeType::LeafRemoveNode;

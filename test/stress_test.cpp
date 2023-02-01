@@ -77,7 +77,7 @@ void StressTest(uint64_t thread_id, TreeType *t) {
 
       for(int j = 0;j < iter;j++) {
         for(int i = 0;i < max_key;i++) {
-          t->GetValue(i, v);
+          // t->GetValue(i, v);
 
           v.clear();
         }

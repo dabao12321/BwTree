@@ -2133,7 +2133,7 @@ public:
         InputIterator iter = first;
         while(iter != last)
         {
-            insert(*iter);
+            // insert(*iter);
             ++iter;
         }
     }

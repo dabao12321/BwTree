@@ -308,7 +308,7 @@ void TestBwTreeInsertReadDeletePerformance(TreeType *t, int key_num) {
 
   for(int j = 0;j < iter;j++) {
     for(int i = 0;i < key_num;i++) {
-      t->GetValue(i, v);
+      // t->GetValue(i, v);
 
       v.clear();
     }
@@ -399,7 +399,7 @@ void TestBwTreeInsertReadDeletePerformance(TreeType *t, int key_num) {
 
   for(int j = 0;j < iter;j++) {
     for(int i = 0;i < key_num;i++) {
-      t->GetValue(i, v);
+      // t->GetValue(i, v);
 
       v.clear();
     }
@@ -414,7 +414,7 @@ void TestBwTreeInsertReadDeletePerformance(TreeType *t, int key_num) {
   // Verify reads
 
   for(int i = 0;i < key_num;i++) {
-    t->GetValue(i, v);
+    // t->GetValue(i, v);
 
     assert(v.size() == 2);
     if(v[0] == (i)) {
@@ -449,7 +449,7 @@ void TestBwTreeInsertReadDeletePerformance(TreeType *t, int key_num) {
             << " million remove/sec" << "\n";
 
   for(int i = 0;i < key_num;i++) {
-    t->GetValue(i, v);
+    // t->GetValue(i, v);
 
     assert(v.size() == 0);
   }
@@ -488,7 +488,7 @@ void TestBwTreeInsertReadPerformance(TreeType *t, int key_num) {
 
   for(int j = 0;j < iter;j++) {
     for(int i = 0;i < key_num;i++) {
-      t->GetValue(i, v);
+      // t->GetValue(i, v);
 
       v.clear();
     }

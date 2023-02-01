@@ -148,7 +148,7 @@ extern bool print_flag;
 #define MAX_THREAD_COUNT ((int)0x7FFFFFFF)
 
 // The maximum number of nodes we could map in this index
-#define MAPPING_TABLE_SIZE ((size_t)(1 << 20))
+#define MAPPING_TABLE_SIZE ((size_t)(1 << 24))
 
 // If the length of delta chain exceeds ( >= ) this then we consolidate the node
 #define INNER_DELTA_CHAIN_LENGTH_THRESHOLD ((int)8)
@@ -3200,6 +3200,9 @@ class BwTree : public BwTreeBase {
    */
   inline const BaseNode *GetNode(const NodeID node_id) {
     assert(node_id != INVALID_NODE_ID);
+    if (node_id >=MAPPING_TABLE_SIZE) {
+      printf("node id %lu, MAPPING_TABLE_SIZE %lu\n", node_id, MAPPING_TABLE_SIZE);
+    }
     assert(node_id < MAPPING_TABLE_SIZE);
 
     return mapping_table[node_id].load();

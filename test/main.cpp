@@ -92,10 +92,10 @@ namespace Dummy {
 }
 
 
-// static uint64_t LOAD_SIZE = 100000000;
-// static uint64_t RUN_SIZE = 100000000;
-static uint64_t LOAD_SIZE = 100000;
-static uint64_t RUN_SIZE = 100000;
+static uint64_t LOAD_SIZE = 100000000;
+static uint64_t RUN_SIZE = 100000000;
+// static uint64_t LOAD_SIZE = 100000;
+// static uint64_t RUN_SIZE = 100000;
 
 void loadKey(TID tid, Key &key) {
     return ;
@@ -260,6 +260,121 @@ void ycsb_load_run_randint(TreeType *t, int index_type, int wl, int kt, int ap, 
 
     fprintf(stderr, "Slept\n");
     
+    // /*
+    if (index_type == TYPE_BWTREE) {
+        t->UpdateThreadLocal(1);
+        t->AssignGCID(0);
+        std::atomic<int> next_thread_id;
+
+        std::vector<uint64_t> query_results_keys(RUN_SIZE);
+        std::vector<uint64_t> query_results_vals(RUN_SIZE);
+
+        {
+            // Load
+            auto starttime = std::chrono::system_clock::now();
+            next_thread_id.store(0);
+            t->UpdateThreadLocal(num_thread);
+            auto func = [&]() {
+                int thread_id = next_thread_id.fetch_add(1);
+                uint64_t start_key = LOAD_SIZE / num_thread * (uint64_t)thread_id;
+                uint64_t end_key = start_key + LOAD_SIZE / num_thread;
+
+                t->AssignGCID(thread_id);
+                for (uint64_t i = start_key; i < end_key; i++) {
+                    t->Insert(init_keys[i], init_keys[i]);
+                }
+                t->UnregisterThread(thread_id);
+            };
+
+            std::vector<std::thread> thread_group;
+
+            for (int i = 0; i < num_thread; i++)
+                thread_group.push_back(std::thread{func});
+
+            for (int i = 0; i < num_thread; i++)
+                thread_group[i].join();
+            t->UpdateThreadLocal(1);
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::system_clock::now() - starttime);
+            printf("Throughput: load, %f ,ops/us\n", (LOAD_SIZE * 1.0) / duration.count());
+        }
+
+        {
+            // Run
+            auto starttime = std::chrono::system_clock::now();
+            next_thread_id.store(0);
+            t->UpdateThreadLocal(num_thread);
+            auto func = [&]() {
+                std::vector<unsigned long> v{};
+                v.reserve(1);
+                int thread_id = next_thread_id.fetch_add(1);
+                uint64_t start_key = RUN_SIZE / num_thread * (uint64_t)thread_id;
+                uint64_t end_key = start_key + RUN_SIZE / num_thread;
+
+                t->AssignGCID(thread_id);
+                for (uint64_t i = start_key; i < end_key; i++) {
+                    if (ops[i] == OP_INSERT) {
+                        t->Insert(keys[i], keys[i]);
+                    } else if (ops[i] == OP_READ) {
+                        v.clear();
+                        t->GetValue(keys[i], v);
+                        if (v[0] != keys[i]) {
+                            std::cout << "[BWTREE] wrong key read: " << v[0] << " expected:" << keys[i] << std::endl;
+                        }
+                    } else if (ops[i] == OP_SCAN) {
+                        auto it = t->Begin(keys[i]);
+                        uint64_t key_sum = 0, val_sum = 0;
+
+                        int resultsFound = 0;
+                        while (it.IsEnd() != true && resultsFound != ranges[i]) {
+                            key_sum += it->first;
+                            val_sum += it->second;
+                            resultsFound++;
+                            it++;
+                        }
+                        query_results_keys[i] = key_sum;
+                        query_results_vals[i] = val_sum;
+                    } else if (ops[i] == OP_SCAN_END) {
+                        auto it = t->Begin(keys[i]);
+                        uint64_t key_sum = 0, val_sum = 0;
+                        while (it.IsEnd() != true && it->first != range_end[i]) {
+                            key_sum += it->first;
+                            val_sum += it->second;
+                            it++;
+                        }
+                        query_results_keys[i] = key_sum;
+                        query_results_vals[i] = val_sum;
+                    } else if (ops[i] == OP_UPDATE) {
+                        std::cout << "NOT SUPPORTED CMD!\n";
+                        exit(0);
+                    }
+                }
+                t->UnregisterThread(thread_id);
+            };
+
+            std::vector<std::thread> thread_group;
+
+            for (int i = 0; i < num_thread; i++)
+                thread_group.push_back(std::thread{func});
+
+            for (int i = 0; i < num_thread; i++)
+                thread_group[i].join();
+            t->UpdateThreadLocal(1);
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::system_clock::now() - starttime);
+            printf("Throughput: run, %f ,ops/us\n", (RUN_SIZE * 1.0) / duration.count());
+        }
+        uint64_t key_sum = 0;
+        uint64_t val_sum = 0;
+        for(int i = 0; i < RUN_SIZE; i++) {
+            key_sum += query_results_keys[i];
+            val_sum += query_results_vals[i];
+        }
+        printf("\ttotal key sum = %lu, total val sum = %lu\n\n", key_sum, val_sum);
+    }
+    return;
+    // */
+    /*
     if (index_type == TYPE_BWTREE) {
         fprintf(stderr, "Starting bwtree load\n");
       
@@ -343,7 +458,7 @@ void ycsb_load_run_randint(TreeType *t, int index_type, int wl, int kt, int ap, 
         printf("\ttotal key sum = %lu, total val sum = %lu\n\n", key_sum, val_sum);
         }
     }
-    
+    */
 }
 
 
