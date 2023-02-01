@@ -81,8 +81,8 @@ class KeyEqualityChecker {
   //KeyEqualityChecker(const KeyEqualityChecker &p_key_eq_obj) = delete;
 };
 
-using TreeType = BwTree<long int,
-                        long int,
+using TreeType = BwTree<uint64_t,
+                        uint64_t,
                         KeyComparator,
                         KeyEqualityChecker>;
                         
