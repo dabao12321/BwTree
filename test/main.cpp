@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
+// #include "../BTreeOLC/BTreeOLC.h"
+#include "../BTreeOLC/BTreeOLC_child_layout.h"
+
 #include<cilk/cilk.h>
 #include<thread>
 
@@ -28,7 +31,7 @@ using TID=uint64_t;
 
 // index types
 enum {
-    TYPE_BTREE,
+    TYPE_BTREEOLC,
     TYPE_ART,
     TYPE_HOT,
     TYPE_BWTREE,
@@ -94,8 +97,6 @@ namespace Dummy {
 
 static uint64_t LOAD_SIZE = 100000000;
 static uint64_t RUN_SIZE = 100000000;
-// static uint64_t LOAD_SIZE = 100000;
-// static uint64_t RUN_SIZE = 100000;
 
 void loadKey(TID tid, Key &key) {
     return ;
@@ -375,94 +376,66 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
             }
             printf("\ttotal key sum = %lu, total val sum = %lu\n\n", key_sum, val_sum);
         }
-    }
-    return;
-    // */
-    /*
-    if (index_type == TYPE_BWTREE) {
-        fprintf(stderr, "Starting bwtree load\n");
-      
-        for(int k =0; k<6; k++){
+
+
+        if (index_type == TYPE_BTREEOLC) {
+            btreeolc::BTree<uint64_t, uint64_t> t;
+            
             std::vector<uint64_t> query_results_keys(RUN_SIZE);
             std::vector<uint64_t> query_results_vals(RUN_SIZE);
-            // tlx::btree_map<uint64_t, uint64_t, std::less<uint64_t>, tlx::btree_default_traits<uint64_t, uint64_t>,
-            //                 std::allocator<uint64_t>, true> concurrent_map;
+
             {
                 // Load
-                auto starttime = get_usecs(); // std::chrono::system_clock::now();
+                auto starttime = std::chrono::system_clock::now();
                 parallel_for(0, LOAD_SIZE, [&](const uint64_t &i) {
-                    // concurrent_map.insert({init_keys[i], init_keys[i]});
-                    t->Insert(init_keys[i], init_keys[i]);
+                    t.insert(init_keys[i], init_keys[i]);
                 });
-                auto end = get_usecs();
-                auto duration = end- starttime; //std::chrono::duration_cast<std::chrono::microseconds>(
-                        //std::chrono::system_clock::now() - starttime);
-                printf("\tLoad took %lu us, throughput = %f ops/us\n", duration, ((double)LOAD_SIZE)/duration);
-                //printf("Throughput: load, %f ,ops/us and time %ld in us\n", (LOAD_SIZE * 1.0) / duration.count(), duration.count());
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                        std::chrono::system_clock::now() - starttime);
+                printf("Throughput: load, %f ,ops/us\n", (LOAD_SIZE * 1.0) / duration.count());
             }
-        {
-            // Run
-            auto starttime = std::chrono::system_clock::now();
-            parallel_for(0, RUN_SIZE, [&](const uint64_t &i) {
 
-                    std::vector<uint64_t> v{};
-                    v.reserve(1);
+            {
+                // Run
+                auto starttime = std::chrono::system_clock::now();
+                parallel_for(0, RUN_SIZE, [&](const uint64_t &i) {
                     if (ops[i] == OP_INSERT) {
-                        // concurrent_map.insert({keys[i], keys[i]});
-                        t->Insert(keys[i], keys[i]);
+                        t.insert(keys[i], keys[i]);
                     } else if (ops[i] == OP_READ) {
-                        v.clear();
-                        t->GetValue(keys[i], v);
-                        if (v[0] != keys[i]) {
-                            std::cout << "[BWTREE] wrong key read: " << v[0] << " expected:" << keys[i] << std::endl;
+                        uint64_t result;
+                        t.lookup(keys[i],result);
+                        if( result && result != keys[i]) {
+                            std::cout << "[BTREE] wrong key read: " << result << " expected:" << keys[i] << std::endl;
+                            exit(0);
                         }
                     } else if (ops[i] == OP_SCAN) {
+                        uint64_t start= keys[i];
+			            uint64_t key_sum = 0, val_sum = 0;
 
-                      // uint64_t buf[200];
-                      auto it = t->Begin(keys[i]);
-                      uint64_t key_sum = 0, val_sum = 0;
+                        uint64_t results[range];
+                        uint64_t count = t.scan(keys[i], ranges[i], results);
+                        for (size_t j = 0; j < count; j++) {
+                            key_sum += results[j];
+                            val_sum += results[j];
+                        }
 
-                      int resultsFound = 0;
-                      while (it.IsEnd() != true && resultsFound != ranges[i]) {
-                          // buf[resultsFound] = it->second;
-                          key_sum += it->first;
-                          val_sum += it->second;
-                          resultsFound++;
-                          it++;
-                      }
                         query_results_keys[i] = key_sum;
                         query_results_vals[i] = val_sum;
                     } else if (ops[i] == OP_SCAN_END) {
-
-                        auto it = t->Begin(keys[i]);
-                        uint64_t key_sum = 0, val_sum = 0;
-                        while (it.IsEnd() != true && it->first != range_end[i]) {
-                            // buf[resultsFound] = it->second;
-                            key_sum += it->first;
-                            val_sum += it->second;
-                            it++;
-                        }
-                        query_results_keys[i] = key_sum;
-                        query_results_vals[i] = val_sum;
+			            std::cout << "NOT SUPPORTED CMD!\n";
+                        exit(0);
                     } else if (ops[i] == OP_UPDATE) {
                         std::cout << "NOT SUPPORTED CMD!\n";
                         exit(0);
                     }
-            });
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
-                    std::chrono::system_clock::now() - starttime);
-            printf("\tRun, throughput: %f ,ops/us\n", (RUN_SIZE * 1.0) / duration.count());
-        }
-        uint64_t key_sum = 0;
-        uint64_t val_sum = 0;
-        for(int i = 0; i < RUN_SIZE; i++) {
-            key_sum += query_results_keys[i];
-            val_sum += query_results_vals[i];
-        }
-        printf("\ttotal key sum = %lu, total val sum = %lu\n\n", key_sum, val_sum);
+                });
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                        std::chrono::system_clock::now() - starttime);
+                printf("Throughput: run, %f ,ops/us\n", (RUN_SIZE * 1.0) / duration.count());
+            }
         }
     }
-    */
+    return;
 }
 
 
@@ -575,7 +548,7 @@ int main(int argc, char **argv) {
         index_type = TYPE_ART;
 
     else if (strcmp(argv[2], "btree") == 0)
-        index_type = TYPE_BTREE;
+        index_type = TYPE_BTREEOLC;
     else if (strcmp(argv[2], "hot") == 0) {
 #ifdef HOT
         index_type = TYPE_HOT;
@@ -674,308 +647,4 @@ int main(int argc, char **argv) {
 
     // DestroyTree(t1);
   }
-  /*
-  if(run_mixed_test == true) {
-    t1 = GetEmptyTree();
-
-    printf("Starting mixed testing...\n");
-    LaunchParallelTestID(t1, mixed_thread_num, MixedTest1, t1);
-    printf("Finished mixed testing\n");
-
-    PrintStat(t1);
-
-    MixedGetValueTest(t1);
-
-    DestroyTree(t1);
-  }
-  
-  if(run_email_test == true) {
-    auto t2 = new BwTree<std::string, long int>{true};
-    
-    TestBwTreeEmailInsertPerformance(t2, "emails_dump.txt");
-    
-    // t2 has already been deleted for memory reason
-  }
-
-  if(run_epoch_test == true) {
-    t1 = GetEmptyTree();
-
-    TestEpochManager(t1);
-
-    DestroyTree(t1);
-  }
-  
-  if(run_benchmark_art_full == true) {
-    ARTType t;
-    art_tree_init(&t);
-    
-    int key_num = 30 * 1024 * 1024;  
-    uint64_t thread_num = 1;
-    
-    printf("Initializing ART's external data array of size = %f MB\n", 
-           sizeof(long int) * key_num / 1024.0 / 1024.0);
-    
-    // This is the array for storing ART's data
-    // Sequential access of the array is fast through ART
-    long int *array = new long int[key_num];
-    for(int i = 0;i < key_num;i++) {
-      array[i] = i; 
-    }
-    
-    BenchmarkARTSeqInsert(&t, key_num, (int)thread_num, array);
-    BenchmarkARTSeqRead(&t, key_num, (int)thread_num);
-    BenchmarkARTRandRead(&t, key_num, (int)thread_num);    
-    BenchmarkARTZipfRead(&t, key_num, (int)thread_num);
-    
-    delete[] array;
-  }
-
-  if(run_benchmark_btree_full == true) {
-    BTreeType *t = GetEmptyBTree();
-    int key_num = 30 * 1024 * 1024;
-    
-    printf("Using key size = %d (%f million)\n",
-           key_num,
-           key_num / (1024.0 * 1024.0));
-    
-    uint64_t thread_num = GetThreadNum();
-    
-    BenchmarkBTreeSeqInsert(t, key_num, (int)thread_num);
-    
-    // Let this go before any of the other
-    BenchmarkBTreeRandLocklessRead(t, key_num, (int)thread_num);
-    BenchmarkBTreeZipfLockLessRead(t, key_num, (int)thread_num);
-    
-    BenchmarkBTreeSeqRead(t, key_num, (int)thread_num);
-    BenchmarkBTreeRandRead(t, key_num, (int)thread_num);    
-    BenchmarkBTreeZipfRead(t, key_num, (int)thread_num);
-    
-    DestroyBTree(t);
-  }
-
-  if(run_benchmark_bwtree == true ||
-     run_benchmark_bwtree_full == true) {
-    t1 = GetEmptyTree();
-
-    int key_num = 3 * 1024 * 1024;
-
-    if(run_benchmark_bwtree_full == true) {
-      key_num *= 10;
-    }
-
-    printf("Using key size = %d (%f million)\n",
-           key_num,
-           key_num / (1024.0 * 1024.0));
-    
-    uint64_t thread_num = GetThreadNum();
-
-    if(run_benchmark_bwtree_full == true) {
-      // Benchmark random insert performance
-      BenchmarkBwTreeRandInsert(key_num, (int)thread_num);
-      // Then we rely on this test to fill bwtree with 30 million keys
-      BenchmarkBwTreeSeqInsert(t1, key_num, (int)thread_num);
-      // And then do a multithreaded sequential read
-      BenchmarkBwTreeSeqRead(t1, key_num, (int)thread_num);
-      // Do a random read with totally random numbers
-      BenchmarkBwTreeRandRead(t1, key_num, (int)thread_num);
-      // Zipfan read
-      BenchmarkBwTreeZipfRead(t1, key_num, (int)thread_num);
-    } else {
-      // This function will delete all keys at the end, so the tree
-      // is empty after it returns
-      TestBwTreeInsertReadDeletePerformance(t1, key_num);
-      
-      DestroyTree(t1, true);
-      t1 = GetEmptyTree(true);
-      
-      // Tests random insert using one thread
-      RandomInsertSpeedTest(t1, key_num);
-      
-      DestroyTree(t1, true);
-      t1 = GetEmptyTree(true);
-      
-      // Test random insert seq read
-      RandomInsertSeqReadSpeedTest(t1, key_num);
-      
-      DestroyTree(t1, true);
-      t1 = GetEmptyTree(true);
-      
-      // Test seq insert random read
-      SeqInsertRandomReadSpeedTest(t1, key_num);
-      
-      // Use stree_multimap as a reference
-      RandomBtreeMultimapInsertSpeedTest(key_num);
-      
-      // Use cuckoohash_map
-      RandomCuckooHashMapInsertSpeedTest(key_num);
-    }
-
-    DestroyTree(t1);
-  }
-
-  if(run_benchmark_all == true) {
-    t1 = GetEmptyTree();
-
-    int key_num = 1024 * 1024 * 3;
-    printf("Using key size = %d (%f million)\n",
-           key_num,
-           key_num / (1024.0 * 1024.0));
-
-    TestStdMapInsertReadPerformance(key_num);
-    TestStdUnorderedMapInsertReadPerformance(key_num);
-    TestBTreeInsertReadPerformance(key_num);
-    TestBTreeMultimapInsertReadPerformance(key_num);
-    TestCuckooHashTableInsertReadPerformance(key_num);
-    TestBwTreeInsertReadPerformance(t1, key_num);
-
-    DestroyTree(t1);
-  }
-
-  if(run_test == true) {
-
-    /////////////////////////////////////////////////////////////////
-    // Test iterator
-    /////////////////////////////////////////////////////////////////
-    
-    // This could print
-    t1 = GetEmptyTree();
-
-    const int key_num = 1024 * 1024;
-
-    // First insert from 0 to 1 million
-    for(int i = 0;i < key_num;i++) {
-      t1->Insert(i, i);
-    }
-
-    ForwardIteratorTest(t1, key_num);
-    BackwardIteratorTest(t1, key_num);
-    
-    PrintStat(t1);
-
-    printf("Finised testing iterator\n");
-    
-    // Do not forget to deletet the tree here
-    DestroyTree(t1, true);
-
-    /////////////////////////////////////////////////////////////////
-    // Test random insert
-    /////////////////////////////////////////////////////////////////
-
-    printf("Testing random insert...\n");
-
-    // Do not print here otherwise we could not see result
-    t1 = GetEmptyTree(true);
-
-    LaunchParallelTestID(t1, 8, RandomInsertTest, t1);
-    RandomInsertVerify(t1);
-    
-    printf("Finished random insert testing. Delete the tree.\n");
-    
-    // no print
-    DestroyTree(t1, true);
-
-    /////////////////////////////////////////////////////////////////
-    // Test mixed insert/delete
-    /////////////////////////////////////////////////////////////////
-    
-    // no print
-    t1 = GetEmptyTree(true);
-
-    LaunchParallelTestID(t1, basic_test_thread_num, MixedTest1, t1);
-    printf("Finished mixed testing\n");
-
-    PrintStat(t1);
-
-    MixedGetValueTest(t1);
-    
-    /////////////////////////////////////////////////////////////////
-    // Test Basic Insert/Delete/GetValue
-    //   with different patterns and multi thread
-    /////////////////////////////////////////////////////////////////
-
-    LaunchParallelTestID(t1, basic_test_thread_num, InsertTest2, t1);
-    printf("Finished inserting all keys\n");
-
-    PrintStat(t1);
-
-    InsertGetValueTest(t1);
-    printf("Finished verifying all inserted values\n");
-
-    LaunchParallelTestID(t1, basic_test_thread_num, DeleteTest1, t1);
-    printf("Finished deleting all keys\n");
-
-    PrintStat(t1);
-
-    DeleteGetValueTest(t1);
-    printf("Finished verifying all deleted values\n");
-
-    LaunchParallelTestID(t1, basic_test_thread_num, InsertTest1, t1);
-    printf("Finished inserting all keys\n");
-
-    PrintStat(t1);
-
-    InsertGetValueTest(t1);
-    printf("Finished verifying all inserted values\n");
-
-    LaunchParallelTestID(t1, basic_test_thread_num, DeleteTest2, t1);
-    printf("Finished deleting all keys\n");
-
-    PrintStat(t1);
-
-    DeleteGetValueTest(t1);
-    printf("Finished verifying all deleted values\n");
-
-    LaunchParallelTestID(t1, basic_test_thread_num, InsertTest1, t1);
-    printf("Finished inserting all keys\n");
-
-    PrintStat(t1);
-
-    InsertGetValueTest(t1);
-    printf("Finished verifying all inserted values\n");
-
-    LaunchParallelTestID(t1, basic_test_thread_num, DeleteTest1, t1);
-    printf("Finished deleting all keys\n");
-
-    PrintStat(t1);
-
-    DeleteGetValueTest(t1);
-    printf("Finished verifying all deleted values\n");
-
-    LaunchParallelTestID(t1, basic_test_thread_num, InsertTest2, t1);
-    printf("Finished inserting all keys\n");
-
-    PrintStat(t1);
-
-    InsertGetValueTest(t1);
-    printf("Finished verifying all inserted values\n");
-
-    LaunchParallelTestID(t1, basic_test_thread_num, DeleteTest2, t1);
-    printf("Finished deleting all keys\n");
-
-    PrintStat(t1);
-
-    DeleteGetValueTest(t1);
-    printf("Finished verifying all deleted values\n");
-
-    DestroyTree(t1);
-  }
-  
-  if(run_infinite_insert_test == true) {
-    t1 = GetEmptyTree();
-
-    InfiniteRandomInsertTest(t1);
-
-    DestroyTree(t1);
-  }
-
-  if(run_stress == true) {
-    t1 = GetEmptyTree();
-
-    LaunchParallelTestID(t1, 8, StressTest, t1);
-
-    DestroyTree(t1);
-  }
-  */
-  return 0;
 }
-

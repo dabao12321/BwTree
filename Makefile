@@ -1,5 +1,5 @@
 
-CXX = g++-5
+CXX = clang++
 PAPI_FLAG = -lpapi
 CXX_FLAG = -pthread -std=c++11 -g -Wall -mcx16 -Wno-invalid-offsetof -march=native -latomic $(PAPI_FLAG)
 GMON_FLAG = 
@@ -113,7 +113,7 @@ mixed-test: main
 	$(PRELOAD_LIB) ./main --mixed-test
 
 ycsb-test: main
-	$(PRELOAD_LIB) ./main --ycsb-test
+	$(PRELOAD_LIB) ./main --ycsb-test bwtree a randint uniform 48
 
 prepare:
 	mkdir -p build
