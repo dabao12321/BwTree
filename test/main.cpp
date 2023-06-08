@@ -115,6 +115,19 @@ template <typename F> inline void parallel_for(size_t start, size_t end, F f) {
   cilk_for(size_t i = start; i < end; i++) f(i);
 }
 
+double findMedian(vector<double>& vec) {
+    size_t size = vec.size();
+    if (size == 0) {
+        return 0;
+    }
+    sort(vec.begin(), vec.end());
+    if (size % 2 == 0) {
+        return (vec[size / 2 - 1] + vec[size / 2]) / 2;
+    } else {
+        return vec[size / 2];
+    }
+}
+
 template <class T>
 std::vector<T> create_random_data(size_t n, size_t max_val,
                                   std::seed_seq &seed) {
@@ -140,49 +153,49 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
 
     if (ap == UNIFORM) {
         if (kt == RANDINT_KEY && wl == WORKLOAD_A) {
-            init_file = "../ycsb/index-microbench/workloads/loada_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsa_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/uniform/loada_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/uniform/txnsa_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_B) {
-            init_file = "../ycsb/index-microbench/workloads/loadb_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsb_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/uniform/loadb_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/uniform/txnsb_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_C) {
-            init_file = "../ycsb/index-microbench/workloads/loadc_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsc_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/uniform/loadc_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/uniform/txnsc_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_D) {
-            init_file = "../ycsb/index-microbench/workloads/loadd_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsd_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/uniform/loadd_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/uniform/txnsd_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_E) {
-            init_file = "../ycsb/index-microbench/workloads/loade_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnse_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/uniform/loade_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/uniform/txnse_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_X) {
-            init_file = "../ycsb/index-microbench/workloads/loadx_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsx_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/uniform/loadx_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/uniform/txnsx_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_Y) {
-            init_file = "../ycsb/index-microbench/workloads/loady_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsy_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/uniform/loady_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/uniform/txnsy_unif_int.dat";
         }
     } else {
         if (kt == RANDINT_KEY && wl == WORKLOAD_A) {
-            init_file = "../ycsb/index-microbench/workloads/loada_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsa_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/zipfian/loada_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/zipfian/txnsa_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_B) {
-            init_file = "../ycsb/index-microbench/workloads/loadb_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsb_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/zipfian/loadb_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/zipfian/txnsb_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_C) {
-            init_file = "../ycsb/index-microbench/workloads/loadc_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsc_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/zipfian/loadc_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/zipfian/txnsc_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_D) {
-            init_file = "../ycsb/index-microbench/workloads/loadd_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsd_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/zipfian/loadd_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/zipfian/txnsd_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_E) {
-            init_file = "../ycsb/index-microbench/workloads/loade_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnse_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/zipfian/loade_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/zipfian/txnse_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_X) {
-            init_file = "../ycsb/index-microbench/workloads/loadx_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsx_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/zipfian/loadx_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/zipfian/txnsx_unif_int.dat";
         } else if (kt == RANDINT_KEY && wl == WORKLOAD_Y) {
-            init_file = "../ycsb/index-microbench/workloads/loady_unif_int.dat";
-            txn_file = "../ycsb/index-microbench/workloads/txnsy_unif_int.dat";
+            init_file = "../ycsb/index-microbench/workloads/zipfian/loadx_unif_int.dat";
+            txn_file = "../ycsb/index-microbench/workloads/zipfian/txnsy_unif_int.dat";
         }
     }
 
@@ -262,6 +275,9 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
     fprintf(stderr, "Slept\n");
     
     // /*
+    vector<double> load_tpts;
+    vector<double> run_tpts;
+
     for (int trial = 0; trial <= 5; trial++) {
 
         if (index_type == TYPE_BWTREE) {
@@ -282,7 +298,9 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
                     int thread_id = next_thread_id.fetch_add(1);
                     uint64_t start_key = LOAD_SIZE / num_thread * (uint64_t)thread_id;
                     uint64_t end_key = start_key + LOAD_SIZE / num_thread;
-
+                    if(thread_id == num_thread - 1){
+                        end_key = LOAD_SIZE;
+                    }
                     t->AssignGCID(thread_id);
                     for (uint64_t i = start_key; i < end_key; i++) {
                         t->Insert(init_keys[i], init_keys[i]);
@@ -301,10 +319,12 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
                 auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                         std::chrono::system_clock::now() - starttime);
                 printf("Throughput: load, %f ,ops/us\n", (LOAD_SIZE * 1.0) / duration.count());
+                if(trial != 0) load_tpts.push_back((LOAD_SIZE * 1.0) / duration.count());
             }
 
             {
                 // Run
+                uint64_t err_count = 0;
                 auto starttime = std::chrono::system_clock::now();
                 next_thread_id.store(0);
                 t->UpdateThreadLocal(num_thread);
@@ -314,6 +334,10 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
                     int thread_id = next_thread_id.fetch_add(1);
                     uint64_t start_key = RUN_SIZE / num_thread * (uint64_t)thread_id;
                     uint64_t end_key = start_key + RUN_SIZE / num_thread;
+                    if(thread_id == num_thread - 1){
+                        end_key = RUN_SIZE;
+                    }
+
 
                     t->AssignGCID(thread_id);
                     for (uint64_t i = start_key; i < end_key; i++) {
@@ -323,7 +347,8 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
                             v.clear();
                             t->GetValue(keys[i], v);
                             if (v[0] != keys[i]) {
-                                std::cout << "[BWTREE] wrong key read: " << v[0] << " expected:" << keys[i] << std::endl;
+                                err_count++;
+                                // std::cout << "[BWTREE] wrong key read: " << v[0] << " expected:" << keys[i] << std::endl;
                             }
                         } else if (ops[i] == OP_SCAN) {
                             auto it = t->Begin(keys[i]);
@@ -367,6 +392,9 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
                 auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                         std::chrono::system_clock::now() - starttime);
                 printf("Throughput: run, %f ,ops/us\n", (RUN_SIZE * 1.0) / duration.count());
+                printf("\n errors count = %lu \n",err_count);
+                if(trial != 0) run_tpts.push_back((RUN_SIZE * 1.0) / duration.count());
+
             }
             uint64_t key_sum = 0;
             uint64_t val_sum = 0;
@@ -435,6 +463,10 @@ void ycsb_load_run_randint(int index_type, int wl, int kt, int ap, int num_threa
             }
         }
     }
+
+    printf("Median load : , %f ,ops/us\n", findMedian(load_tpts));
+    printf("Median run : , %f ,ops/us\n", findMedian(run_tpts));
+
     return;
 }
 

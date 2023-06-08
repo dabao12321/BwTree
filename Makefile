@@ -113,7 +113,7 @@ mixed-test: main
 	$(PRELOAD_LIB) ./main --mixed-test
 
 ycsb-test: main
-	$(PRELOAD_LIB) ./main --ycsb-test bwtree a randint uniform 48
+	$(PRELOAD_LIB) ./main --ycsb-test bwtree y randint zipfian 48
 
 prepare:
 	mkdir -p build

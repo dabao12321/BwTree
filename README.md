@@ -8,7 +8,12 @@ This project is developed together with Peloton, a self-adaptive database system
 Benchmark 
 ========= 
 
-(Since currently this repo is undergoing radical design changes, benchmark will be unavailable for few weeks)
+YCSB benchmark instructions: 
+- To build the YCSB tests, cd into the `test/` directory and run `make CILK=1 main`. 
+- To run the YCSB tests on the BWtree, run `./main --ycsb-test bwtree [workload_type] [key_type] [distribution] [threads]`. This will run 5 trials of the requested workload and return the median throughput for both the load and run phase.
+
+Note that the YCSB tests load pre-generated workloads from a file path. To change the file path, modify `test/main.cpp:156-198`. 
+
 
 Improvements 
 ================================
